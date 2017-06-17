@@ -1,0 +1,20 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+
+sourceCompatibility = 1.8
+version = '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile files('libs/ConfigurationAPI-1.3.jar')
+}
+
+jar {
+    manifest {
+        attributes("Main-Class": "lostpotatofoundation.hentaigalleryviewer.gui.MainGui",
+                   "Application-Name": "Hentai Gallery Viewer")
+    }
+}
