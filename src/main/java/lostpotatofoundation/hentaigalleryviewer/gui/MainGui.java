@@ -64,7 +64,7 @@ public class MainGui extends Application {
         rootPane.getChildren().add(pane);
 
         rootPane.heightProperty().addListener((observable, oldValue, newValue) -> onWindowResize_H(primaryStage, rootPane, newValue));
-        rootPane.widthProperty().addListener(((observable, oldValue, newValue) -> onWindowResize_W(primaryStage, rootPane, newValue)));
+        rootPane.widthProperty().addListener(((observable, oldValue, newValue) -> onWindowResize_W(primaryStage, rootPane, newValue, topPane)));
 
         primaryStage.setScene(new Scene(rootPane));
         primaryStage.show();
@@ -106,8 +106,8 @@ public class MainGui extends Application {
             for (int h = 0; h <= extraDownloaders_H; h++) {
                 if (h <= 0 && w <= 0) continue;
 
-                if (h > 0) root.getChildren().add(horizontalLines2d.put(w, h, new Line(256 * w, 360 * h, 256 * (w + 1), 360 * h)));
-                if (w > 0) root.getChildren().add(verticalLines2d.put(w, h, new Line(256 * w, 360 * h, 256 * w, 360 * (h + 1))));
+                if (h > 0) root.getChildren().add(horizontalLines2d.put(w, h, new Line(180 * w, 320 * h, 180 * (w + 1), 320 * h)));
+                if (w > 0) root.getChildren().add(verticalLines2d.put(w, h, new Line(180 * w, (320 * h)+60, 180 * w, (320 * (h + 1))+60)));
 
                 if (panes2d.containsKey(w, h)) continue;
 
@@ -128,18 +128,22 @@ public class MainGui extends Application {
             }
         }
 
-        stage.setMinWidth(minSizeX); stage.setMinHeight(minSizeY);
+        stage.setMinWidth(minSizeX); stage.setMinHeight(minSizeY+60);
         root.getChildren().removeIf(node -> node instanceof Line && !verticalLines2d.containsValue(node) && !horizontalLines2d.containsValue(node));
         root.getChildren().removeIf(node -> node instanceof Pane && !node.getId().equalsIgnoreCase("0:0") && !node.getId().equalsIgnoreCase("searchBox") && !panes2d.containsValue(node));
     }
 
-    private void onWindowResize_W(Stage stage, Pane root, Number newValue) {
-        extraDownloaders_W = Math.max((int) Math.floor((newValue.doubleValue() - 256D) / 256D), 0);
+    private void onWindowResize_W(Stage stage, Pane root, Number newValue, Pane topPane) {
+        topPane.setPrefWidth(newValue.intValue());
+//        double sc = newValue.intValue()/topPane.getPrefWidth();
+//        topPane.setScaleX(sc);
+//        topPane.setLayoutX(((64*sc)-64)*4);
+        extraDownloaders_W = Math.max((int) Math.floor((newValue.doubleValue() - 180D) / 180D), 0);
         updateClientWindows(stage, root);
     }
 
     private void onWindowResize_H(Stage stage, Pane root, Number newValue) {
-        extraDownloaders_H = Math.max((int) Math.floor((newValue.doubleValue() - 360D) / 360D), 0);
+        extraDownloaders_H = Math.max((int) Math.floor((newValue.doubleValue() - 320D) / 320D), 0);
         updateClientWindows(stage, root);
     }
 }

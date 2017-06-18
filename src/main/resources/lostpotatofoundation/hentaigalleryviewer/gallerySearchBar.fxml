@@ -4,9 +4,9 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="60.0" prefWidth="512.0" style="-fx-background-color: #012;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lostpotatofoundation.hentaigalleryviewer.gui.MainController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="60.0" prefWidth="180.0" style="-fx-background-color: #012;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lostpotatofoundation.hentaigalleryviewer.gui.MainController">
    <children>
-      <ProgressBar fx:id="progressBar" layoutX="6.0" layoutY="37.0" prefHeight="18.0" prefWidth="501.0" progress="0.0" />
-      <TextField fx:id="searchBox" layoutX="6.0" layoutY="5.0" onKeyPressed="#keyPressEvent" prefHeight="25.0" prefWidth="501.0" style="-fx-background-color: #123; -fx-text-fill: #0DD;" />
+      <TextField fx:id="searchBox" layoutX="2.0" layoutY="2.0" onKeyPressed="#keyPressEvent" prefHeight="25.0" prefWidth="252.0" style="-fx-background-color: #234; -fx-text-fill: #0DD;" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="8.0" />
+      <ProgressBar fx:id="progressBar" layoutX="2.0" layoutY="34.0" opacity="0.5" prefWidth="252.0" progress="0.0" AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="40.0" />
    </children>
-</Pane>
+</AnchorPane>
