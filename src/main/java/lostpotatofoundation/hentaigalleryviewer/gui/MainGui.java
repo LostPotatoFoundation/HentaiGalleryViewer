@@ -49,6 +49,9 @@ public class MainGui extends Application {
         FXMLLoader topBar = new FXMLLoader(getClass().getResource("/lostpotatofoundation/hentaigalleryviewer/gallerySearchBar.fxml"));
         FXMLLoader initialLoader = new FXMLLoader(getClass().getResource("/lostpotatofoundation/hentaigalleryviewer/galleryPanel.fxml"));
 
+        File cacheDir = new File(System.getProperty("user.dir"), "cache");
+        if (!cacheDir.exists()) cacheDir.mkdirs();
+
         rootPane = new Pane();
         primaryStage.setTitle("Hentai viewer");
         topPane = topBar.load();

@@ -18,9 +18,6 @@ public class Configuration {
     public static String defaultSearchURL = "https://exhentai.org/?f_doujinshi=1&f_manga=1&f_artistcg=0&f_gamecg=0&f_western=0&f_non-h=0&f_imageset=0&f_cosplay=0&f_asianporn=0&f_misc=0";
 
     @Config.category("Other")
-    public static LinkedList<String> cssSheets = new LinkedList<>(Arrays.asList("light.css", "dark.css", "peach.css", "pink.css"));
-
-    @Config.category("Other")
     @Config.comment("This will split titles on the | and use the second part, may break in some rare cases. Report those with gallery title or link please.")
     public static boolean attemptEnglish = true;
 

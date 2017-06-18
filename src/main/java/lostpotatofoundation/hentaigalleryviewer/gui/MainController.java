@@ -1,6 +1,8 @@
 package lostpotatofoundation.hentaigalleryviewer.gui;
 
+import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.control.Button;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -9,13 +11,15 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
 import lostpotatofoundation.hentaigalleryviewer.Configuration;
+import lostpotatofoundation.hentaigalleryviewer.GalleryDownloadThread;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import javax.imageio.ImageIO;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.SocketException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Stack;
 import java.util.regex.Matcher;
@@ -29,13 +33,64 @@ public class MainController {
     public Button downloadGallery;
     public Button viewGallery;
     public TextField searchBox;
+    public ProgressBar progressBar;
 
     private Stack<String> linkStack = new Stack<>();
+    private static File cacheDir = new File(System.getProperty("user.dir"), "cache");
 
-    private int listOffset = 0, pagesIndexed = 0;
+    private static volatile int listOffset = 0, pagesIndexed = 0;
+    private GalleryDownloadThread downloader;
+    private static boolean running = false;
+    private static volatile HashMap<String, Pane> panes = new HashMap<>();
+    private static volatile HashMap<Pane, ImageView> views = new HashMap<>();
+
+    private boolean searchPerformed = false;
+
+    private void start() {
+        running = true;
+        Thread main = new Thread(() -> {
+            while (running) {
+                try {
+                    if (searchPerformed && galleryIndex.size() > 0) {
+                        panes.forEach((id, pane) -> {
+                            galleryData d = galleryIndex.get(listOffset + getPaneNumericalId(id));
+//                            System.out.println("Setting pane " + id + "  " + pane.getId() + " with " + d.imageName);
+                            try {
+                                File fimage = new File(cacheDir, d.imageName + ".png");
+                                views.get(pane).setImage(SwingFXUtils.toFXImage(ImageIO.read(fimage), null));
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        });
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                while (downloader != null && !downloader.isDone()) {
+                    if (progressBar == null) continue;
+                    progressBar.setProgress((downloader.getDownloadProgress() + downloader.getCompressionProgress()) / 2.0D);
+                }
+
+                progressBar.setProgress(0.0D);
+                if (!linkStack.empty())
+                    startDownload(linkStack.pop());
+            }
+        });
+        main.setDaemon(true);
+        main.start();
+    }
+
+    private void startDownload(String link) {
+        downloader = new GalleryDownloadThread(link);
+        downloader.start();
+    }
+
+    public Integer getPaneNumericalId(String str) {
+        return Integer.parseInt(str.split(":")[0]) + Integer.parseInt(str.split(":")[1]);
+    }
 
     public void clicked(MouseEvent mouseEvent) {
-        int galleryClicked = Integer.parseInt(pane.getId().split(":")[0]) + Integer.parseInt(pane.getId().split(":")[1]);
+        int galleryClicked = getPaneNumericalId(pane.getId()) + listOffset;
         System.out.println(galleryIndex.get(galleryClicked).title);
         linkStack.add(galleryIndex.get(galleryClicked).url.getPath());
     }
@@ -43,6 +98,8 @@ public class MainController {
     String searchURL = Configuration.defaultSearchURL;
     public void keyPressEvent(KeyEvent keyEvent) {
         if (keyEvent.getCode().equals(KeyCode.ENTER)) {
+            if (!running) start();
+            searchPerformed = true;
             //TODO search
             pagesIndexed = 0;
             searchURL = Configuration.defaultSearchURL;
@@ -62,6 +119,7 @@ public class MainController {
     public void doSearch() {
         try {
             URL url = new URL(searchURL.concat("&page=" + pagesIndexed));
+            System.out.println(searchURL);
             pagesIndexed += 1;
 
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -94,8 +152,12 @@ public class MainController {
                         title.add(g.split(">")[1]);
                 }
                 while (galleryPreviewMatcher.find()) {
-                    previewImage.add(galleryPreviewMatcher.group());
+                    String g = galleryPreviewMatcher.group();
+                    previewImage.add(g);
+                    downloadImage(g);
                 }
+                if (previewImage.size() > 0)
+                    System.out.println(previewImage.toString());
             }
             for (int i = 0; i < link.size(); i++) {
                 galleryIndex.add(new galleryData(link.get(i), previewImage.get(i), title.get(i)));
@@ -105,11 +167,53 @@ public class MainController {
         }
     }
 
+    private void downloadImage(String urlString) throws Exception {
+        if (urlString.length() < 12) return;
+        System.out.println("Downloading from " + urlString);
+        Matcher m = Pattern.compile("(?!/)[^./]{9,}").matcher(urlString);
+        m.find();
+        System.out.println(m.group());
+        try {
+            URL url = new URL(urlString);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.addRequestProperty("Cookie", Configuration.getCookies());
+
+
+            File imageFile = new File(cacheDir, m.group() +".png");
+            if (!imageFile.createNewFile()) return;
+
+            InputStream inputStream = connection.getInputStream();
+            FileOutputStream outputStream = new FileOutputStream(imageFile);
+
+            byte[] b = new byte[16384];
+            int length;
+            while ((length = inputStream.read(b)) != -1) {
+                outputStream.write(b, 0, length);
+            }
+            inputStream.close();
+            outputStream.close();
+        } catch (SocketException e) {
+            System.out.println(m.group(0));
+            System.out.println(e.getMessage());
+            File f = new File(cacheDir, m.group(0) + ".png");
+            if (f.exists()) f.delete();
+            downloadImage(urlString);
+        }
+        File f = new File(cacheDir, m.group(0) + ".png");
+        if (!f.canRead() || !f.exists() || f.getTotalSpace() == 0) {
+            f.delete();
+            downloadImage(urlString);
+        }
+    }
+
+
     public void mouseScrollEvent(ScrollEvent scrollEvent) {
         if (scrollEvent.getDeltaY() < 0) {
             listOffset += 1;
-            if (galleryIndex.size() - listOffset < Configuration.buffer) {
-
+            if (galleryIndex.size() - (listOffset + panes.size()) < Configuration.buffer) {
+                doSearch();
+                if (galleryIndex.size() - (listOffset + panes.size()) == 0)
+                    listOffset -= 1;
             }
             //scroll down
         } else if (scrollEvent.getDeltaY() > 0) {
@@ -119,16 +223,30 @@ public class MainController {
     }
 
     public static volatile LinkedList<galleryData> galleryIndex = new LinkedList<>();
+
+    public void mouseMovedEvent(MouseEvent mouseEvent) {
+        if (!panes.containsKey(pane.getId())) {
+            panes.put(pane.getId(), pane);
+            views.put(pane, galleryView);
+            System.out.println("Pane ID = " + getPaneNumericalId(pane.getId()) + " added to list.");
+        }
+    }
+
     private class galleryData {
         public URL url;
         public URL image;
         public String title;
+        public String imageName;
 
         public galleryData(String u, String i, String t) {
             try {
                 url = new URL(u);
                 image = new URL(i);
                 title = t;
+                Matcher m = Pattern.compile("(?!/)[^./]{9,}").matcher(i);
+                m.find();
+//                System.out.println(m.group(0) + " from " + i);
+                imageName = m.group();
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
