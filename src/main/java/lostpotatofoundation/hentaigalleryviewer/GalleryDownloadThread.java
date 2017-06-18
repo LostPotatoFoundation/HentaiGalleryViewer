@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+@SuppressWarnings({"ResultOfMethodCallIgnored", "unused", "WeakerAccess"})
 public class GalleryDownloadThread extends Thread {
     private static volatile int downloaderID = 0;
 
@@ -31,9 +32,9 @@ public class GalleryDownloadThread extends Thread {
 
     static final String IMAGE_PATTERN = "(?:http://\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}(:\\d{1,5})?/)[^\"]+";
 
-    static final String TITLE_PARSE_PATTERN = "(\\[.*?\\]|\\{.*?\\}|\\(.*?\\))|(=.*=|~.*~)|([^a-z,A-Z,\\s,\\-,\\~,\\|,\\d,\\_])|(\\s{2,}|\\s+\\.)";
+    static final String TITLE_PARSE_PATTERN = "(\\[.*?]|\\{.*?}|\\(.*?\\))|(=.*=|~.*~)|([^a-z,A-Z\\s\\-~|\\d_])|(\\s{2,}|\\s+\\.)";
 
-    public static File downloadDir = new File(System.getProperty("user.dir"), "DirtyDownloads");
+    private static File downloadDir = new File(System.getProperty("user.dir"), "DirtyDownloads");
     
     private final String pageURLString;
 

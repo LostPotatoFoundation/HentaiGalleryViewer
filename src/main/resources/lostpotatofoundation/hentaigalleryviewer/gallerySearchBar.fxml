@@ -7,6 +7,6 @@
 <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="60.0" prefWidth="512.0" style="-fx-background-color: #012;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lostpotatofoundation.hentaigalleryviewer.gui.MainController">
    <children>
       <ProgressBar fx:id="progressBar" layoutX="6.0" layoutY="37.0" prefHeight="18.0" prefWidth="501.0" progress="0.0" />
-      <TextField fx:id="searchBox" layoutX="6.0" layoutY="5.0" onKeyPressed="#keyPressEvent" prefHeight="25.0" prefWidth="501.0" style="-fx-background-color: #123;" />
+      <TextField fx:id="searchBox" layoutX="6.0" layoutY="5.0" onKeyPressed="#keyPressEvent" prefHeight="25.0" prefWidth="501.0" style="-fx-background-color: #123; -fx-text-fill: #0DD;" />
    </children>
 </Pane>

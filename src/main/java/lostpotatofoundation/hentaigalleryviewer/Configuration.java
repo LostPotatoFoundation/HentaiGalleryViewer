@@ -32,9 +32,6 @@ public class Configuration {
     @Config.category("Compression")
     public static String program7zPath = "C:/Program Files/7-Zip/7z.exe";
 
-    @Config.category("Other")
-    public static String watchedLinksFilePath = "C:/Users/Public/Downloads/links.txt";
-
     @Config.category("Compression")
     @Config.comment("Current options cb7/7z and cbz/zip. can be zip/7z or cbz/cb7 extension. Notes: cb7 only works on windows for now and requires the program7zPath to be set correctly.")
     public static String compressionType = "cbz";

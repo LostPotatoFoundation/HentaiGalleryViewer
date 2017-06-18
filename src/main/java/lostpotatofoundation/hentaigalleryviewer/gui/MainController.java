@@ -7,7 +7,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
 import lostpotatofoundation.hentaigalleryviewer.Configuration;
@@ -16,7 +15,6 @@ import lostpotatofoundation.hentaigalleryviewer.GalleryDownloadThread;
 import javax.imageio.ImageIO;
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URL;
 import java.util.HashMap;
@@ -27,11 +25,12 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@SuppressWarnings("ResultOfMethodCallIgnored")
 public class MainController {
     public ImageView galleryView;
     public Pane pane;
-    public Button downloadGallery;
-    public Button viewGallery;
+    public Button downloadGalleryButton;
+    public Button viewGalleryButton;
     public TextField searchBox;
     public ProgressBar progressBar;
 
@@ -71,7 +70,9 @@ public class MainController {
                     progressBar.setProgress((downloader.getDownloadProgress() + downloader.getCompressionProgress()) / 2.0D);
                 }
 
-                progressBar.setProgress(0.0D);
+                if (progressBar != null) {
+                    progressBar.setProgress(0.0D);
+                }
                 if (!linkStack.empty())
                     startDownload(linkStack.pop());
             }
@@ -85,17 +86,17 @@ public class MainController {
         downloader.start();
     }
 
-    public Integer getPaneNumericalId(String str) {
+    private Integer getPaneNumericalId(String str) {
         return Integer.parseInt(str.split(":")[0]) + Integer.parseInt(str.split(":")[1]);
     }
 
-    public void clicked(MouseEvent mouseEvent) {
+    public void clicked() {
         int galleryClicked = getPaneNumericalId(pane.getId()) + listOffset;
         System.out.println(galleryIndex.get(galleryClicked).title);
-        linkStack.add(galleryIndex.get(galleryClicked).url.getPath());
+        linkStack.add(galleryIndex.get(galleryClicked).url);
     }
 
-    String searchURL = Configuration.defaultSearchURL;
+    private String searchURL = Configuration.defaultSearchURL;
     public void keyPressEvent(KeyEvent keyEvent) {
         if (keyEvent.getCode().equals(KeyCode.ENTER)) {
             if (!running) start();
@@ -116,7 +117,7 @@ public class MainController {
         }
     }
 
-    public void doSearch() {
+    private void doSearch() {
         try {
             URL url = new URL(searchURL.concat("&page=" + pagesIndexed));
             System.out.println(searchURL);
@@ -138,9 +139,9 @@ public class MainController {
 
             LinkedList<String> link = new LinkedList<>(), title = new LinkedList<>(), previewImage = new LinkedList<>();
             for (String line : lineList) {
-                Matcher galleryLinkMatcher = Pattern.compile("https?:\\/\\/exhentai\\.org\\/g\\/[^\"]+").matcher(line),
-                        galleryTitleMatcher = Pattern.compile("(?=https?:\\/\\/exhentai\\.org\\/g\\/[^\"]+)[^<]+").matcher(line),
-                        galleryPreviewMatcher = Pattern.compile("https?:\\/\\/exhentai\\.org\\/t\\/[^\"]+").matcher(line);
+                Matcher galleryLinkMatcher = Pattern.compile("https?://exhentai\\.org/g/[^\"]+").matcher(line),
+                        galleryTitleMatcher = Pattern.compile("(?=https?://exhentai\\.org/g/[^\"]+)[^<]+").matcher(line),
+                        galleryPreviewMatcher = Pattern.compile("https?://exhentai\\.org/t/[^\"]+").matcher(line);
                 while (galleryLinkMatcher.find()) {
                     String g = galleryLinkMatcher.group();
                     if (!link.contains(g))
@@ -222,9 +223,9 @@ public class MainController {
         }
     }
 
-    public static volatile LinkedList<galleryData> galleryIndex = new LinkedList<>();
+    private static volatile LinkedList<galleryData> galleryIndex = new LinkedList<>();
 
-    public void mouseMovedEvent(MouseEvent mouseEvent) {
+    public void mouseMovedEvent() {
         if (!panes.containsKey(pane.getId())) {
             panes.put(pane.getId(), pane);
             views.put(pane, galleryView);
@@ -232,24 +233,28 @@ public class MainController {
         }
     }
 
-    private class galleryData {
-        public URL url;
-        public URL image;
-        public String title;
-        public String imageName;
+    public void downloadGallery() {
+        linkStack.add(galleryIndex.get(getPaneNumericalId(pane.getId())).url);
+    }
 
-        public galleryData(String u, String i, String t) {
-            try {
-                url = new URL(u);
-                image = new URL(i);
-                title = t;
-                Matcher m = Pattern.compile("(?!/)[^./]{9,}").matcher(i);
-                m.find();
+    public void viewGallery() {
+
+    }
+
+    private class galleryData {
+        String url;
+        String image;
+        String title;
+        String imageName;
+
+        galleryData(String u, String i, String t) {
+            url = u;
+            image = i;
+            title = t;
+            Matcher m = Pattern.compile("(?!/)[^./]{9,}").matcher(i);
+            m.find();
 //                System.out.println(m.group(0) + " from " + i);
-                imageName = m.group();
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
+            imageName = m.group();
         }
     }
 }

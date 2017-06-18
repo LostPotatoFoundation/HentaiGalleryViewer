@@ -20,10 +20,11 @@ import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.HashSet;
 
+@SuppressWarnings("ResultOfMethodCallIgnored")
 public class MainGui extends Application {
     private double initialWidth, initialHeight;
-    public static HxCConfig mainConfig;
-    public volatile static Pane rootPane = null, topPane = null;
+    private volatile static Pane rootPane = null;
+
     public static void main(String[] args) {
         URLClassLoader classLoader = (URLClassLoader) MainGui.class.getClassLoader();
         try {
@@ -37,7 +38,7 @@ public class MainGui extends Application {
             e.printStackTrace();
         }
 
-        mainConfig = new HxCConfig(Configuration.class, "configuration", new File(System.getProperty("user.dir")), "cfg", "galleryDownloader");
+        HxCConfig mainConfig = new HxCConfig(Configuration.class, "configuration", new File(System.getProperty("user.dir")), "cfg", "galleryDownloader");
         mainConfig.initConfiguration();
         Configuration.initCookies();
 
@@ -54,7 +55,7 @@ public class MainGui extends Application {
 
         rootPane = new Pane();
         primaryStage.setTitle("Hentai viewer");
-        topPane = topBar.load();
+        Pane topPane = topBar.load();
         topPane.setId("searchBox");
         Pane pane = initialLoader.load();
         pane.setId("0:0");
