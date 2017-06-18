@@ -33,19 +33,21 @@ public class MainController {
     public Button viewGalleryButton;
     public TextField searchBox;
     public ProgressBar progressBar;
+    public TextField galleryTitle;
 
-    private Stack<String> linkStack = new Stack<>();
+    static final String TITLE_PARSE_PATTERN = "(\\[.*?]|\\{.*?}|\\(.*?\\))|(=.*=|~.*~)|([^a-z,A-Z\\s\\-~|\\d_])|(\\s{2,}|\\s+\\.)";
+
+    private static volatile Stack<String> linkStack = new Stack<>();
     private static File cacheDir = new File(System.getProperty("user.dir"), "cache");
 
     private static volatile int listOffset = 0, pagesIndexed = 0;
     private GalleryDownloadThread downloader;
-    private static boolean running = false;
-    private static volatile HashMap<String, Pane> panes = new HashMap<>();
-    private static volatile HashMap<Pane, ImageView> views = new HashMap<>();
+    private static volatile boolean running = false;
+    private static volatile HashMap<String, galleryPane> panes = new HashMap<>();
 
-    private boolean searchPerformed = false;
+    private static volatile boolean searchPerformed = false;
 
-    private void start() {
+    private synchronized void start() {
         running = true;
         Thread main = new Thread(() -> {
             while (running) {
@@ -55,8 +57,9 @@ public class MainController {
                             galleryData d = galleryIndex.get(listOffset + getPaneNumericalId(id));
 //                            System.out.println("Setting pane " + id + "  " + pane.getId() + " with " + d.imageName);
                             try {
+                                pane.galleryTitle.setText(d.title);
                                 File fimage = new File(cacheDir, d.imageName + ".png");
-                                views.get(pane).setImage(SwingFXUtils.toFXImage(ImageIO.read(fimage), null));
+                                pane.iView.setImage(SwingFXUtils.toFXImage(ImageIO.read(fimage), null));
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -82,11 +85,12 @@ public class MainController {
     }
 
     private void startDownload(String link) {
+        System.out.println("Attempting Download of " + link);
         downloader = new GalleryDownloadThread(link);
         downloader.start();
     }
 
-    private Integer getPaneNumericalId(String str) {
+    private static Integer getPaneNumericalId(String str) {
         return Integer.parseInt(str.split(":")[0]) + Integer.parseInt(str.split(":")[1]);
     }
 
@@ -227,14 +231,13 @@ public class MainController {
 
     public void mouseMovedEvent() {
         if (!panes.containsKey(pane.getId())) {
-            panes.put(pane.getId(), pane);
-            views.put(pane, galleryView);
-            System.out.println("Pane ID = " + getPaneNumericalId(pane.getId()) + " added to list.");
+            panes.put(pane.getId(), new galleryPane(pane, pane.getId(), galleryTitle, galleryView));
         }
     }
 
     public void downloadGallery() {
-        linkStack.add(galleryIndex.get(getPaneNumericalId(pane.getId())).url);
+        if (!linkStack.contains(galleryIndex.get(getPaneNumericalId(pane.getId())).url))
+            linkStack.add(galleryIndex.get(getPaneNumericalId(pane.getId())).url);
     }
 
     public void viewGallery() {
@@ -250,11 +253,24 @@ public class MainController {
         galleryData(String u, String i, String t) {
             url = u;
             image = i;
-            title = t;
+            title = t.replaceAll(TITLE_PARSE_PATTERN, "");
             Matcher m = Pattern.compile("(?!/)[^./]{9,}").matcher(i);
             m.find();
 //                System.out.println(m.group(0) + " from " + i);
             imageName = m.group();
+        }
+    }
+
+    private class galleryPane {
+        Pane p;
+        String id;
+        TextField galleryTitle;
+        ImageView iView;
+        galleryPane(Pane pane, String name, TextField titleDisplay, ImageView imageView) {
+            p = pane;
+            id = name;
+            galleryTitle = titleDisplay;
+            iView = imageView;
         }
     }
 }

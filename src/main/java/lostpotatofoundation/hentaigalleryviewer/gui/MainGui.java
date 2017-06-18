@@ -78,7 +78,7 @@ public class MainGui extends Application {
 
     private HashMap<Pane, FXMLLoader> loaders = new HashMap<>();
 
-    private TwoDimensionalValueHashMap<Integer, Pane> panes2d = new TwoDimensionalValueHashMap<>();
+    public static volatile TwoDimensionalValueHashMap<Integer, Pane> panes2d = new TwoDimensionalValueHashMap<>();
     private TwoDimensionalValueHashMap<Integer, Line> verticalLines2d = new TwoDimensionalValueHashMap<>();
     private TwoDimensionalValueHashMap<Integer, Line> horizontalLines2d = new TwoDimensionalValueHashMap<>();
 
@@ -106,8 +106,12 @@ public class MainGui extends Application {
             for (int h = 0; h <= extraDownloaders_H; h++) {
                 if (h <= 0 && w <= 0) continue;
 
-                if (h > 0) root.getChildren().add(horizontalLines2d.put(w, h, new Line(180 * w, 320 * h, 180 * (w + 1), 320 * h)));
-                if (w > 0) root.getChildren().add(verticalLines2d.put(w, h, new Line(180 * w, (320 * h)+60, 180 * w, (320 * (h + 1))+60)));
+                if (h > 0)
+                    root.getChildren().add(horizontalLines2d.put(w, h,
+                        new Line(180 * w, (320 * h)+60, 180 * (w + 1), (320 * h)+60)));
+                if (w > 0)
+                    root.getChildren().add(verticalLines2d.put(w, h,
+                        new Line(180 * w, (320 * h)+60, 180 * w, (320 * (h + 1))+60)));
 
                 if (panes2d.containsKey(w, h)) continue;
 
@@ -135,15 +139,16 @@ public class MainGui extends Application {
 
     private void onWindowResize_W(Stage stage, Pane root, Number newValue, Pane topPane) {
         topPane.setPrefWidth(newValue.intValue());
-//        double sc = newValue.intValue()/topPane.getPrefWidth();
-//        topPane.setScaleX(sc);
-//        topPane.setLayoutX(((64*sc)-64)*4);
         extraDownloaders_W = Math.max((int) Math.floor((newValue.doubleValue() - 180D) / 180D), 0);
         updateClientWindows(stage, root);
     }
 
+    //TODO Make not shrinkable below created panels size
+    //or self remove from panels list
+    //TODO Make panels list that controller can read
+
     private void onWindowResize_H(Stage stage, Pane root, Number newValue) {
-        extraDownloaders_H = Math.max((int) Math.floor((newValue.doubleValue() - 320D) / 320D), 0);
+        extraDownloaders_H = Math.max((int) Math.floor((newValue.doubleValue() - 380D) / 320D), 0);
         updateClientWindows(stage, root);
     }
 }

@@ -9,9 +9,9 @@
 <Pane fx:id="pane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onScroll="#mouseScrollEvent" prefHeight="320.0" prefWidth="180.0" style="-fx-background-color: #012;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lostpotatofoundation.hentaigalleryviewer.gui.MainController">
    <children>
       <ImageView fx:id="galleryView" fitHeight="260.0" fitWidth="160.0" layoutX="10.0" layoutY="24.0" onMouseClicked="#clicked" onMouseMoved="#mouseMovedEvent" pickOnBounds="true" preserveRatio="true" />
-      <Button fx:id="downloadGalleryButton" layoutX="95.0" layoutY="295.0" mnemonicParsing="false" onAction="#downloadGallery" prefHeight="25.0" prefWidth="80.0" style="-fx-background-color: #123; -fx-text-fill: #0EE;" text="Download" />
-      <Button fx:id="viewGalleryButton" layoutX="5.0" layoutY="295.0" mnemonicParsing="false" onAction="#viewGallery" prefHeight="25.0" prefWidth="80.0" style="-fx-background-color: #123; -fx-text-fill: #0EE;" text="View" />
-      <TextField layoutX="10.0" prefHeight="14.0" prefWidth="160.0" style="-fx-background-color: #234; -fx-text-fill: #0FF;">
+      <Button fx:id="downloadGalleryButton" layoutX="95.0" layoutY="290.0" mnemonicParsing="false" onAction="#downloadGallery" prefHeight="25.0" prefWidth="80.0" style="-fx-background-color: #123; -fx-text-fill: #0EE;" text="Download" />
+      <Button fx:id="viewGalleryButton" layoutX="5.0" layoutY="290.0" mnemonicParsing="false" onAction="#viewGallery" prefHeight="25.0" prefWidth="80.0" style="-fx-background-color: #123; -fx-text-fill: #0EE;" text="View" />
+      <TextField fx:id="galleryTitle" editable="false" layoutX="10.0" prefHeight="14.0" prefWidth="160.0" style="-fx-background-color: #234; -fx-text-fill: #0FF;">
          <font>
             <Font name="Segoe UI" size="10.0" />
          </font>
