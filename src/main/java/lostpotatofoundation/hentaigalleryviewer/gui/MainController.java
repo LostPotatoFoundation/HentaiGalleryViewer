@@ -49,7 +49,8 @@ public class MainController {
                 if (!linkStack.empty())
                     startDownload(linkStack.pop());
 
-                if (galleryIndex.size() <= (listOffset + Configuration.buffer)) doSearch();
+                if (galleryIndex.size() <= (MainGui.panes2d.size() + listOffset + Configuration.buffer))
+                    doSearch();
             }
         });
         main.setDaemon(true);
@@ -81,7 +82,7 @@ public class MainController {
     private void doSearch() {
         try {
             URL url = new URL(searchURL.concat("&page=" + pagesIndexed));
-            System.out.println(searchURL);
+            System.out.println("Searching up " + searchURL);
             pagesIndexed += 1;
 
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -121,24 +122,21 @@ public class MainController {
                     previewImage.add(g);
                     downloadImage(g);
                 }
-
-                if (previewImage.size() > 0)
-                    System.out.println(previewImage.toString());
             }
             for (int i = 0; i < link.size(); i++) {
                 galleryIndex.add(new galleryData(link.get(i), previewImage.get(i), title.get(i)));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("doSearch = " + e.getMessage());
+            if (Configuration.debug)
+                e.printStackTrace();
         }
     }
 
     private void downloadImage(String urlString) throws Exception {
         if (urlString.length() < 12) return;
-        System.out.println("Downloading from " + urlString);
         Matcher m = Pattern.compile("(?!/)[^./]{9,}").matcher(urlString);
         m.find();
-        System.out.println(m.group());
         try {
             URL url = new URL(urlString);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -160,7 +158,7 @@ public class MainController {
             outputStream.close();
         } catch (SocketException e) {
             System.out.println(m.group(0));
-            System.out.println(e.getMessage());
+            System.out.println("downloadImage " + e.getMessage());
             File f = new File(cacheDir, m.group(0) + ".png");
             if (f.exists()) f.delete();
             downloadImage(urlString);
@@ -170,9 +168,11 @@ public class MainController {
             f.delete();
             downloadImage(urlString);
         }
+        MainGui.instance.updateAll();
     }
 
     static volatile LinkedList<galleryData> galleryIndex = new LinkedList<>();
+
     class galleryData {
         String url;
         String image;

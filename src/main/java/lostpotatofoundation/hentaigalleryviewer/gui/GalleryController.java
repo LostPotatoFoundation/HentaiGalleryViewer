@@ -9,7 +9,6 @@ import lostpotatofoundation.hentaigalleryviewer.Configuration;
 
 import javax.imageio.ImageIO;
 import java.io.File;
-import java.io.IOException;
 
 import static lostpotatofoundation.hentaigalleryviewer.gui.MainController.*;
 
@@ -18,52 +17,46 @@ public class GalleryController {
     public TextField galleryTitle;
     public Pane pane;
     byte id = -1;
+    String image = "";
 
-    void start() {
-        Thread main = new Thread(() -> {
-            while (id > -1) {
-                try {
-                    if (galleryIndex.size() > id) {
-                        try {
-                            MainController.galleryData d = galleryIndex.get(listOffset + id);
-                            galleryTitle.setText(d.title);
-                            File fimage = new File(cacheDir, d.imageName + ".png");
-                            galleryView.setImage(SwingFXUtils.toFXImage(ImageIO.read(fimage), null));
-                        } catch (IOException e) {
-                            System.out.println(e.getMessage());
-                            if (Configuration.debug)
-                                e.printStackTrace();
-                        }
-                    }
-                } catch (Exception e) {
-                    System.out.println(e.getMessage());
-                    if (Configuration.debug)
-                        e.printStackTrace();
+    void update() {
+        System.out.println("Updated id " + id);
+        try {
+            if (galleryIndex.size() > id) {
+                MainController.galleryData d = galleryIndex.get(listOffset + id);
+                if (!image.equals(d.title)) {
+                    galleryTitle.setText(d.title);
+                    File fimage = new File(cacheDir, d.imageName + ".png");
+                    galleryView.setImage(SwingFXUtils.toFXImage(ImageIO.read(fimage), null));
                 }
             }
-        });
-        main.setDaemon(true);
-        main.start();
+        } catch (Exception e) {
+            System.out.println("start " + id + " " + e.getMessage());
+            if (Configuration.debug)
+                e.printStackTrace();
+        }
+    }
+
+    void start() {
+//        Thread main = new Thread(() -> {
+//            while (id > -1) {
+//            }
+//        });
+//        main.setDaemon(true);
+//        main.start();
     }
 
     public void clicked() {
         int galleryClicked = id + MainController.listOffset;
-        System.out.println(galleryIndex.get(galleryClicked).title);
         linkStack.add(galleryIndex.get(galleryClicked).url);
     }
     
     public void mouseScrollEvent(ScrollEvent scrollEvent) {
-        if (scrollEvent.getDeltaY() < 0) {
+        if (scrollEvent.getDeltaY() < 0) //scroll down
             MainController.listOffset += 1;
-            //scroll down
-        } else if (scrollEvent.getDeltaY() > 0) {
-            if (MainController.listOffset > 0) MainController.listOffset -= 1;
-            //scroll up
-        }
-        if (MainController.listOffset < 0) MainController.listOffset = 0;
-
-        if (MainController.listOffset + id >= MainController.galleryIndex.size())
-            MainController.listOffset = MainController.listOffset + id;
+        else if (scrollEvent.getDeltaY() > 0 && MainController.listOffset > 0) //scroll up
+            MainController.listOffset -= 1;
+        MainGui.instance.updateAll();
     }
 
     public void downloadGallery() {

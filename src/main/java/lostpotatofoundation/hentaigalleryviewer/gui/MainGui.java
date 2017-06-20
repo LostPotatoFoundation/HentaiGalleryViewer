@@ -19,10 +19,10 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class MainGui extends Application {
+    public static MainGui instance = null;
     private double initialWidth, initialHeight;
     private volatile static Pane rootPane = null;
 
@@ -48,6 +48,7 @@ public class MainGui extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        instance = this;
         FXMLLoader topBar = new FXMLLoader(getClass().getResource("/lostpotatofoundation/hentaigalleryviewer/gallerySearchBar.fxml"));
         FXMLLoader initialLoader = new FXMLLoader(getClass().getResource("/lostpotatofoundation/hentaigalleryviewer/galleryPanel.fxml"));
 
@@ -57,6 +58,7 @@ public class MainGui extends Application {
         rootPane = new Pane();
         primaryStage.setTitle("Hentai viewer");
         Pane topPane = topBar.load();
+
         topPane.setId("searchBox");
         Pane pane = initialLoader.load();
         pane.setId("0:0");
@@ -68,10 +70,7 @@ public class MainGui extends Application {
         rootPane.widthProperty().addListener(((observable, oldValue, newValue) -> onWindowResize_W(primaryStage, rootPane, newValue, topPane)));
 
         GalleryController c = initialLoader.getController();
-        c.id = (byte) controllers.size();
-        if (controllers.containsKey(pane.getId()))
-            System.out.println("FUCKITY FUCK KAREL = " + pane.getId());
-        controllers.put(pane.getId(), c);
+        c.id = (byte) loaders.size();
         c.start();
 
         primaryStage.setScene(new Scene(rootPane));
@@ -84,6 +83,12 @@ public class MainGui extends Application {
         primaryStage.setMinWidth(primaryStage.getWidth());
     }
 
+    public void updateAll() {
+        loaders.values().forEach(a -> {
+            ((GalleryController)a.getController()).update();
+        });
+    }
+
     private HashMap<Pane, FXMLLoader> loaders = new HashMap<>();
 
     public static volatile TwoDimensionalValueHashMap<Integer, Pane> panes2d = new TwoDimensionalValueHashMap<>();
@@ -91,8 +96,6 @@ public class MainGui extends Application {
     private TwoDimensionalValueHashMap<Integer, Line> horizontalLines2d = new TwoDimensionalValueHashMap<>();
 
     private int extraDownloaders_H, extraDownloaders_W;
-
-    private static volatile LinkedHashMap<String, GalleryController> controllers = new LinkedHashMap<>();
 
     @SuppressWarnings("SuspiciousMethodCalls")
     private void updateClientWindows(Stage stage, Pane root) {
@@ -129,34 +132,32 @@ public class MainGui extends Application {
                     Pane newPane = loader.load();
 
                     newPane.setTranslateX(newPane.getPrefWidth() * w);
-                    newPane.setTranslateY(newPane.getPrefHeight() * h+60);
+                    newPane.setTranslateY(newPane.getPrefHeight() * h + 60);
 
                     newPane.setId(w + ":" + h);
 
                     loaders.put(newPane, loader);
                     root.getChildren().add(panes2d.put(w, h, newPane));
                     GalleryController c = loader.getController();
-                    c.id = (byte) controllers.size();
-                    if (controllers.containsKey(newPane.getId()))
-                        System.out.println("FUCKITY FUCK KAREL = " + newPane.getId());
-                    controllers.put(newPane.getId(), c);
+                    c.id = (byte) loaders.size();
                     c.start();
                 } catch (IOException e) {
-                    System.out.println(e.getMessage());
+                    System.out.println("updateClientWindows " + e.getMessage());
                     if (Configuration.debug)
                         e.printStackTrace();
                 }
             }
         }
 
-        stage.setMinWidth(minSizeX); stage.setMinHeight(minSizeY+60);
-        root.getChildren().removeIf(node -> node instanceof Line && !verticalLines2d.containsValue(node) && !horizontalLines2d.containsValue(node));
-        root.getChildren().removeIf(node -> node instanceof Pane && !node.getId().equalsIgnoreCase("0:0") && !node.getId().equalsIgnoreCase("searchBox") && !panes2d.containsValue(node));
+//        stage.setMinWidth(minSizeX); stage.setMinHeight(minSizeY+60);
+//        root.getChildren().removeIf(node -> node instanceof Line && !verticalLines2d.containsValue(node) && !horizontalLines2d.containsValue(node));
+//        root.getChildren().removeIf(node -> node instanceof Pane && !node.getId().equalsIgnoreCase("0:0") && !node.getId().equalsIgnoreCase("searchBox") && !panes2d.containsValue(node));
     }
 
     private void onWindowResize_W(Stage stage, Pane root, Number newValue, Pane topPane) {
+        if (initialWidth == 0) return;
         topPane.setPrefWidth(newValue.intValue());
-        extraDownloaders_W = Math.max((int) Math.floor((newValue.doubleValue() - initialWidth) / initialWidth), 0);
+        extraDownloaders_W = Math.max((int) Math.floor((newValue.doubleValue() - 180D) / 180D), 0);
         updateClientWindows(stage, root);
     }
 
@@ -165,7 +166,8 @@ public class MainGui extends Application {
     //TODO Make panels list that controller can read
 
     private void onWindowResize_H(Stage stage, Pane root, Number newValue) {
-        extraDownloaders_H = Math.max((int) Math.floor((newValue.doubleValue() - initialHeight + 60D) / initialHeight), 0);
+        if (initialHeight == 0) return;
+        extraDownloaders_H = Math.max((int) Math.floor((newValue.doubleValue() - 380D) / 320D), 0);
         updateClientWindows(stage, root);
     }
 }
