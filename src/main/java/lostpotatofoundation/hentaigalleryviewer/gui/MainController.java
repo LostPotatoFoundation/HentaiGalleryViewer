@@ -65,10 +65,10 @@ public class MainController {
     private static volatile String searchURL = Configuration.defaultSearchURL;
     public void keyPressEvent(KeyEvent keyEvent) {
         if (keyEvent.getCode().equals(KeyCode.ENTER)) {
-            if (!running) start();
             pagesIndexed = 0;
             searchURL = Configuration.defaultSearchURL;
             listOffset = 0;
+            galleryIndex = new LinkedList<>();
 
             String[] searchArgs = searchBox.getText().split(" ");
             searchURL = searchURL.concat("&f_search=");
@@ -90,7 +90,6 @@ public class MainController {
 
             InputStream inputStream = connection.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "utf-8"));
-
 
             LinkedList<String> lineList = new LinkedList<>();
             Stream<String> lines = reader.lines();
@@ -131,6 +130,7 @@ public class MainController {
             if (Configuration.debug)
                 e.printStackTrace();
         }
+        if (!running) start();
         MainGui.instance.updateAll();
     }
 
