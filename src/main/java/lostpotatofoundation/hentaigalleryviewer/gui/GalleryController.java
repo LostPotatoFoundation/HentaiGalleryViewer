@@ -20,7 +20,7 @@ public class GalleryController {
     String image = "";
 
     void update() {
-        System.out.println("Updated id " + id);
+//        System.out.println("Updated id " + id);
         try {
             if (galleryIndex.size() > id) {
                 MainController.galleryData d = galleryIndex.get(listOffset + id);

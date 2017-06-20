@@ -18,7 +18,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.HashMap;
-import java.util.HashSet;
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class MainGui extends Application {
@@ -70,8 +69,8 @@ public class MainGui extends Application {
         rootPane.widthProperty().addListener(((observable, oldValue, newValue) -> onWindowResize_W(primaryStage, rootPane, newValue, topPane)));
 
         GalleryController c = initialLoader.getController();
-        c.id = (byte) loaders.size();
-        c.start();
+        c.id = 0;
+        loaders.put(pane, initialLoader);
 
         primaryStage.setScene(new Scene(rootPane));
         primaryStage.show();
@@ -99,20 +98,7 @@ public class MainGui extends Application {
 
     @SuppressWarnings("SuspiciousMethodCalls")
     private void updateClientWindows(Stage stage, Pane root) {
-        double minSizeX = initialWidth, minSizeY = initialHeight;
-
         horizontalLines2d.clear(); verticalLines2d.clear();
-
-        for (Integer key1 : new HashSet<>(panes2d.keySet())) {
-            for (Integer key2 : new HashSet<>(panes2d.get(key1).keySet())) {
-                if (loaders.containsKey(panes2d.get(key2, key1))) {
-                    panes2d.remove2D(key2, key1);
-                } else if (loaders.containsKey(panes2d.get(key2, key1))) {
-                    minSizeX = Math.max(panes2d.get(key2, key1).getTranslateX() + minSizeX, minSizeX);
-                    minSizeY = Math.max(panes2d.get(key2, key1).getTranslateY() + minSizeY, minSizeY);
-                }
-            }
-        }
 
         for (int w = 0; w <= extraDownloaders_W; w++) {
             for (int h = 0; h <= extraDownloaders_H; h++) {
@@ -136,10 +122,11 @@ public class MainGui extends Application {
 
                     newPane.setId(w + ":" + h);
 
-                    loaders.put(newPane, loader);
                     root.getChildren().add(panes2d.put(w, h, newPane));
                     GalleryController c = loader.getController();
                     c.id = (byte) loaders.size();
+
+                    loaders.put(newPane, loader);
                     c.start();
                 } catch (IOException e) {
                     System.out.println("updateClientWindows " + e.getMessage());

@@ -131,6 +131,7 @@ public class MainController {
             if (Configuration.debug)
                 e.printStackTrace();
         }
+        MainGui.instance.updateAll();
     }
 
     private void downloadImage(String urlString) throws Exception {
@@ -168,7 +169,6 @@ public class MainController {
             f.delete();
             downloadImage(urlString);
         }
-        MainGui.instance.updateAll();
     }
 
     static volatile LinkedList<galleryData> galleryIndex = new LinkedList<>();
