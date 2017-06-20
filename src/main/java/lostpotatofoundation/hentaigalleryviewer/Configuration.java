@@ -21,6 +21,9 @@ public class Configuration {
     @Config.comment("This will split titles on the | and use the second part, may break in some rare cases. Report those with gallery title or link please.")
     public static boolean attemptEnglish = true;
 
+    @Config.category("Other")
+    public static boolean tagCensored = true;
+
     @Config.category("Compression")
     @Config.comment("Zips/7zips images.")
     public static boolean compress = true;

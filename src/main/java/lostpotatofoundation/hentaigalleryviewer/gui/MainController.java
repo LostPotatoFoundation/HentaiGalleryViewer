@@ -65,10 +65,14 @@ public class MainController {
     private static volatile String searchURL = Configuration.defaultSearchURL;
     public void keyPressEvent(KeyEvent keyEvent) {
         if (keyEvent.getCode().equals(KeyCode.ENTER)) {
+            fail = false;
             pagesIndexed = 0;
             searchURL = Configuration.defaultSearchURL;
             listOffset = 0;
             galleryIndex = new LinkedList<>();
+
+            cacheDir.delete();
+            cacheDir.mkdirs();
 
             String[] searchArgs = searchBox.getText().split(" ");
             searchURL = searchURL.concat("&f_search=");
@@ -79,8 +83,12 @@ public class MainController {
         }
     }
 
+    private boolean fail;
+
     private void doSearch() {
+        if (fail) return;
         try {
+            int galSize = galleryIndex.size();
             URL url = new URL(searchURL.concat("&page=" + pagesIndexed));
             System.out.println("Searching up " + searchURL);
             pagesIndexed += 1;
@@ -125,6 +133,7 @@ public class MainController {
             for (int i = 0; i < link.size(); i++) {
                 galleryIndex.add(new galleryData(link.get(i), previewImage.get(i), title.get(i)));
             }
+            if (galSize == galleryIndex.size()) fail = true;
         } catch (Exception e) {
             System.out.println("doSearch = " + e.getMessage());
             if (Configuration.debug)
@@ -183,6 +192,7 @@ public class MainController {
             url = u;
             image = i;
             title = t.replaceAll(TITLE_PARSE_PATTERN, "");
+            if (Configuration.tagCensored && t.contains("Uncensored") || t.contains("Decensored")) title += " [Uncensored]";
             Matcher m = Pattern.compile("(?!/)[^./]{9,}").matcher(i);
             m.find();
 //                System.out.println(m.group(0) + " from " + i);
