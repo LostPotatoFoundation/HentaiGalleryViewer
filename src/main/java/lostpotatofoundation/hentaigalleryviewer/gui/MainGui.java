@@ -19,6 +19,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class MainGui extends Application {
@@ -66,6 +67,13 @@ public class MainGui extends Application {
         rootPane.heightProperty().addListener((observable, oldValue, newValue) -> onWindowResize_H(primaryStage, rootPane, newValue));
         rootPane.widthProperty().addListener(((observable, oldValue, newValue) -> onWindowResize_W(primaryStage, rootPane, newValue, topPane)));
 
+        GalleryController c = initialLoader.getController();
+        c.id = (byte) controllers.size();
+        if (controllers.containsKey(pane.getId()))
+            System.out.println("FUCKITY FUCK KAREL = " + pane.getId());
+        controllers.put(pane.getId(), c);
+        c.start();
+
         primaryStage.setScene(new Scene(rootPane));
         primaryStage.show();
 
@@ -84,6 +92,8 @@ public class MainGui extends Application {
 
     private int extraDownloaders_H, extraDownloaders_W;
 
+    private static volatile LinkedHashMap<String, GalleryController> controllers = new LinkedHashMap<>();
+
     @SuppressWarnings("SuspiciousMethodCalls")
     private void updateClientWindows(Stage stage, Pane root) {
         double minSizeX = initialWidth, minSizeY = initialHeight;
@@ -101,17 +111,16 @@ public class MainGui extends Application {
             }
         }
 
-
         for (int w = 0; w <= extraDownloaders_W; w++) {
             for (int h = 0; h <= extraDownloaders_H; h++) {
                 if (h <= 0 && w <= 0) continue;
 
                 if (h > 0)
                     root.getChildren().add(horizontalLines2d.put(w, h,
-                        new Line(180 * w, (320 * h)+60, 180 * (w + 1), (320 * h)+60)));
+                            new Line(180 * w, (320 * h)+60, 180 * (w + 1), (320 * h)+60)));
                 if (w > 0)
                     root.getChildren().add(verticalLines2d.put(w, h,
-                        new Line(180 * w, (320 * h)+60, 180 * w, (320 * (h + 1))+60)));
+                            new Line(180 * w, (320 * h)+60, 180 * w, (320 * (h + 1))+60)));
 
                 if (panes2d.containsKey(w, h)) continue;
 
@@ -126,8 +135,16 @@ public class MainGui extends Application {
 
                     loaders.put(newPane, loader);
                     root.getChildren().add(panes2d.put(w, h, newPane));
+                    GalleryController c = loader.getController();
+                    c.id = (byte) controllers.size();
+                    if (controllers.containsKey(newPane.getId()))
+                        System.out.println("FUCKITY FUCK KAREL = " + newPane.getId());
+                    controllers.put(newPane.getId(), c);
+                    c.start();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    System.out.println(e.getMessage());
+                    if (Configuration.debug)
+                        e.printStackTrace();
                 }
             }
         }
@@ -139,7 +156,7 @@ public class MainGui extends Application {
 
     private void onWindowResize_W(Stage stage, Pane root, Number newValue, Pane topPane) {
         topPane.setPrefWidth(newValue.intValue());
-        extraDownloaders_W = Math.max((int) Math.floor((newValue.doubleValue() - 180D) / 180D), 0);
+        extraDownloaders_W = Math.max((int) Math.floor((newValue.doubleValue() - initialWidth) / initialWidth), 0);
         updateClientWindows(stage, root);
     }
 
@@ -148,7 +165,7 @@ public class MainGui extends Application {
     //TODO Make panels list that controller can read
 
     private void onWindowResize_H(Stage stage, Pane root, Number newValue) {
-        extraDownloaders_H = Math.max((int) Math.floor((newValue.doubleValue() - 380D) / 320D), 0);
+        extraDownloaders_H = Math.max((int) Math.floor((newValue.doubleValue() - initialHeight + 60D) / initialHeight), 0);
         updateClientWindows(stage, root);
     }
 }
