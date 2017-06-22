@@ -1,23 +1,30 @@
 package lostpotatofoundation.hentaigalleryviewer.gui;
 
 import javafx.embed.swing.SwingFXUtils;
+import javafx.event.EventHandler;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import lostpotatofoundation.hentaigalleryviewer.Configuration;
+import lostpotatofoundation.hentaigalleryviewer.GalleryDownloadThread;
 
 import javax.imageio.ImageIO;
 import java.io.File;
 
 import static lostpotatofoundation.hentaigalleryviewer.gui.MainController.*;
 
+@SuppressWarnings("all")
 public class GalleryController {
     public ImageView galleryView;
     public TextField galleryTitle;
     public Pane pane;
     byte id = -1;
-    String image = "";
+    private String image = "";
 
     void update() {
 //        System.out.println("Updated id " + id);
@@ -35,15 +42,6 @@ public class GalleryController {
             if (Configuration.debug)
                 e.printStackTrace();
         }
-    }
-
-    void start() {
-//        Thread main = new Thread(() -> {
-//            while (id > -1) {
-//            }
-//        });
-//        main.setDaemon(true);
-//        main.start();
     }
 
     public void clicked() {
@@ -65,6 +63,33 @@ public class GalleryController {
     }
 
     public void viewGallery() {
+        FXMLLoader viewLoader = new FXMLLoader(getClass().getResource("/lostpotatofoundation/hentaigalleryviewer/galleryViewPanel.fxml"));
 
+        Stage primaryStage = new Stage();
+        primaryStage.setTitle(galleryTitle.getText());
+
+        try {
+            Pane pane = viewLoader.load();
+            pane.setId(galleryTitle.getText());
+
+            primaryStage.setScene(new Scene(pane));
+            primaryStage.show();
+
+            GalleryViewController c = viewLoader.getController();
+            String url = galleryIndex.get((id + MainController.listOffset)).url;
+            GalleryDownloadThread thread = new GalleryDownloadThread(url);
+            c.thread = thread;
+            c.stage = primaryStage;
+            primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+                @Override
+                public void handle(WindowEvent event) {
+                    thread.deleteLoseArchive();
+                }
+            });
+            c.display();
+        } catch (Exception e) {
+            System.out.println("viewGallery " + e.getMessage());
+            if (Configuration.debug) e.printStackTrace();
+        }
     }
 }
