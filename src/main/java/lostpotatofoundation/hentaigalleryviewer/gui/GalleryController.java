@@ -83,6 +83,7 @@ public class GalleryController {
             primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
                 @Override
                 public void handle(WindowEvent event) {
+                    c.dead = true;
                     thread.deleteLoseArchive();
                 }
             });

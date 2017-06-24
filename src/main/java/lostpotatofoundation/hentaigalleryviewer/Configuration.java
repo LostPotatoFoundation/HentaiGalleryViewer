@@ -15,6 +15,9 @@ public class Configuration {
     public static int buffer = 10;
 
     @Config.category("Other")
+    public static int imageBuffer = 3;
+
+    @Config.category("Other")
     public static String defaultSearchURL = "https://exhentai.org/?f_doujinshi=1&f_manga=1&f_artistcg=0&f_gamecg=0&f_western=0&f_non-h=0&f_imageset=0&f_cosplay=0&f_asianporn=0&f_misc=0";
 
     @Config.category("Other")
@@ -23,6 +26,9 @@ public class Configuration {
 
     @Config.category("Other")
     public static boolean tagCensored = true;
+
+    @Config.category("Other")
+    public static boolean preBuffer = true;
 
     @Config.category("Compression")
     @Config.comment("Zips/7zips images.")

@@ -48,7 +48,7 @@ public class GalleryDownloadThread extends Thread {
         System.out.println(pageURLString);
         long nano = System.nanoTime();
 
-        parsePage(pageURLString);
+        parsePage(pageURLString, true);
         imageFile = null;
 
         processAndSaveGallery();
@@ -134,7 +134,7 @@ public class GalleryDownloadThread extends Thread {
         }
     }
 
-    private void parsePage(String pageURLString) {
+    private void parsePage(String pageURLString, boolean downloadImages) {
         if (Configuration.debug) System.out.println(pageURLString);
         try {
             URL url = new URL(pageURLString);
@@ -163,22 +163,31 @@ public class GalleryDownloadThread extends Thread {
                 if (title.isEmpty()) continue;
 
                 while (slideMatcher.find()) {
-                    parseSlide(new File(downloadDir, title), slideMatcher.group());
+                    imageLinks.add(slideMatcher.group());
                     imageID++;
                 }
 
                 if (!pageNumberFound || !rowNumberFound) continue;
 
                 if (imageID > rows * 10 * (pageNumber + 1) && imageID <= pages) {
-                    parsePage(pageURLString.replaceAll("\\?p=\\d+", "") + "?p=" + ++pageNumber);
+                    parsePage(pageURLString.replaceAll("\\?p=\\d+", "") + "?p=" + ++pageNumber, true);
                 }
+            }
+            if (downloadImages) {
+                final int[] index = new int[]{0};
+                imageLinks.forEach(im -> {
+                    parseSlide(new File(downloadDir, title), im, index[0]);
+                    index[0] += 1;
+                });
             }
         } catch (Exception e) {
             if (Configuration.debug) e.printStackTrace();
         }
     }
 
-    private void parseSlide(File galleryDir, String urlString) {
+    LinkedList<String> imageLinks = new LinkedList<>();
+
+    private void parseSlide(File galleryDir, String urlString, int id) {
         if (Configuration.debug) System.out.println(urlString);
         try {
             if (!galleryDir.exists() && !galleryDir.mkdirs()) throw new RuntimeException("Couldn't create download directory.");
@@ -201,7 +210,7 @@ public class GalleryDownloadThread extends Thread {
                 Matcher matcher = Pattern.compile(IMAGE_PATTERN).matcher(line);
 
                 while (matcher.find()) {
-                    downloadImage(galleryDir, matcher.group());
+                    downloadImage(galleryDir, matcher.group(), id);
                 }
             }
 
@@ -210,7 +219,7 @@ public class GalleryDownloadThread extends Thread {
         }
     }
 
-    private void downloadImage(File galleryDir, String urlString) throws Exception {
+    private void downloadImage(File galleryDir, String urlString, int id) throws Exception {
         //System.out.println(urlString);
 
         try {
@@ -218,7 +227,7 @@ public class GalleryDownloadThread extends Thread {
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.addRequestProperty("Cookie", Configuration.getCookies());
 
-            imageFile = new File(galleryDir, imageID +".png");
+            imageFile = new File(galleryDir, id +".png");
             if (!imageFile.createNewFile()) return;
 
             InputStream inputStream = connection.getInputStream();
@@ -235,12 +244,12 @@ public class GalleryDownloadThread extends Thread {
             System.out.println(e.getMessage());
             File f = new File(galleryDir, imageID + ".png");
             if (f.exists()) f.delete();
-            downloadImage(galleryDir, urlString);
+            downloadImage(galleryDir, urlString, id);
         }
         File f = new File(galleryDir, imageID + ".png");
         if (!f.canRead() || !f.exists() || f.getTotalSpace() == 0) {
             f.delete();
-            downloadImage(galleryDir, urlString);
+            downloadImage(galleryDir, urlString, id);
         }
     }
 
@@ -266,14 +275,14 @@ public class GalleryDownloadThread extends Thread {
         return imageFile;
     }
 
-    @SuppressWarnings("ConstantConditions")
-    public void getGalleryForViewing() {
-        parsePage(pageURLString);
-//        imageFile = null;
-//        File looseFileDirectory = new File(downloadDir, title);
-//        List<File> temp = new ArrayList<>();
-//        temp.addAll(Arrays.asList(looseFileDirectory.listFiles()));
-        done = true;
+    public LinkedList<String> getGalleryForViewing() {
+        parsePage(pageURLString, false);
+        return imageLinks;
+    }
+
+    public File getImage(String url, int id) {
+        parseSlide(new File(downloadDir, title), url, id);
+        return imageFile;
     }
 
     public void processAndSaveGallery() {
