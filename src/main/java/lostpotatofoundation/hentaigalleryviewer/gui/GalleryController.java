@@ -48,12 +48,17 @@ public class GalleryController {
         int galleryClicked = id + MainController.listOffset;
         linkStack.add(galleryIndex.get(galleryClicked).url);
     }
-    
+
     public void mouseScrollEvent(ScrollEvent scrollEvent) {
         if (scrollEvent.getDeltaY() < 0) //scroll down
-            MainController.listOffset += 1;
+            MainController.listOffset += (MainGui.extraDownloaders_W + 1);
         else if (scrollEvent.getDeltaY() > 0 && MainController.listOffset > 0) //scroll up
-            MainController.listOffset -= 1;
+            MainController.listOffset -= (MainGui.extraDownloaders_W + 1);
+        if (MainController.listOffset < 0) MainController.listOffset = 0;
+
+        if (galleryIndex.size() <= (MainGui.panes2d.size() + listOffset + Configuration.buffer))
+            MainController.instance.doSearch();
+
         MainGui.instance.updateAll();
     }
 

@@ -23,6 +23,8 @@ public class MainController {
     public TextField searchBox;
     public ProgressBar progressBar;
 
+    public static MainController instance;
+
     private static final String TITLE_PARSE_PATTERN = "(\\[.*?]|\\{.*?}|\\(.*?\\))|(=.*=|~.*~)|([^a-z,A-Z\\s\\-~|\\d_])|(\\s{2,}|\\s+\\.)";
 
     static volatile Stack<String> linkStack = new Stack<>();
@@ -35,7 +37,9 @@ public class MainController {
     static final File cacheDir = new File(System.getProperty("user.dir"), "cache");
 
     private synchronized void start() {
+        instance = this;
         running = true;
+
         Thread main = new Thread(() -> {
             while (running) {
                 while (downloader != null && !downloader.isDone()) {
@@ -48,9 +52,6 @@ public class MainController {
 
                 if (!linkStack.empty())
                     startDownload(linkStack.pop());
-
-                if (galleryIndex.size() <= (MainGui.panes2d.size() + listOffset + Configuration.buffer))
-                    doSearch();
             }
         });
         main.setDaemon(true);
@@ -85,7 +86,7 @@ public class MainController {
 
     private boolean fail;
 
-    private void doSearch() {
+    public void doSearch() {
         if (fail) return;
         try {
             int galSize = galleryIndex.size();

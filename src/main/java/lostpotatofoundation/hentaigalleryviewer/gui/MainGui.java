@@ -93,7 +93,7 @@ public class MainGui extends Application {
     private TwoDimensionalValueHashMap<Integer, Line> verticalLines2d = new TwoDimensionalValueHashMap<>();
     private TwoDimensionalValueHashMap<Integer, Line> horizontalLines2d = new TwoDimensionalValueHashMap<>();
 
-    private int extraDownloaders_H, extraDownloaders_W;
+    public static int extraDownloaders_H, extraDownloaders_W;
 
     @SuppressWarnings("SuspiciousMethodCalls")
     private void updateClientWindows(Stage stage, Pane root) {
