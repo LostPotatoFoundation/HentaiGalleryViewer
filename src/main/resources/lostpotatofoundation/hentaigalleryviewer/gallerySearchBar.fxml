@@ -1,12 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import java.lang.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="60.0" prefWidth="180.0" style="-fx-background-color: #012;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lostpotatofoundation.hentaigalleryviewer.gui.MainController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="60.0" prefWidth="180.0" style="-fx-background-color: #012;" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lostpotatofoundation.hentaigalleryviewer.gui.MainController">
    <children>
-      <TextField fx:id="searchBox" layoutX="2.0" layoutY="2.0" onKeyPressed="#keyPressEvent" prefHeight="25.0" prefWidth="252.0" style="-fx-background-color: #234; -fx-text-fill: #0DD;" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="8.0" />
+      <TextField fx:id="searchBox" layoutX="2.0" layoutY="2.0" onKeyPressed="#keyPressEvent" prefHeight="25.0" prefWidth="164.0" style="-fx-background-color: #234; -fx-text-fill: #0DD;" AnchorPane.leftAnchor="48.0" AnchorPane.rightAnchor="48.0" AnchorPane.topAnchor="8.0" />
       <ProgressBar fx:id="progressBar" layoutX="2.0" layoutY="34.0" opacity="0.5" prefWidth="252.0" progress="0.0" AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="40.0" />
+      <TextField fx:id="pageCount" alignment="TOP_LEFT" editable="false" layoutX="8.0" layoutY="5.0" prefHeight="0.0" prefWidth="35.0" style="-fx-background-color: #012; -fx-text-fill: #0DD;" AnchorPane.leftAnchor="8.0">
+         <font>
+            <Font size="8.0" />
+         </font>
+      </TextField>
+      <TextField fx:id="downloadQueue" alignment="CENTER_RIGHT" editable="false" layoutX="137.0" layoutY="8.0" prefHeight="25.0" prefWidth="35.0" style="-fx-background-color: #012; -fx-text-fill: #0DD;" AnchorPane.rightAnchor="8.0" />
+      <TextField fx:id="pageIndex" alignment="TOP_LEFT" layoutX="8.0" layoutY="21.0" prefHeight="0.0" prefWidth="35.0" style="-fx-background-color: #012; -fx-text-fill: #0DD;" AnchorPane.leftAnchor="8.0">
+         <font>
+            <Font size="8.0" />
+         </font>
+      </TextField>
    </children>
 </AnchorPane>

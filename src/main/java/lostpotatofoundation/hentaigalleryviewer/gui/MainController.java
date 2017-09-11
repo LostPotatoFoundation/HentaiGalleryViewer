@@ -35,6 +35,9 @@ public class MainController {
     private static volatile boolean running;
 
     static final File cacheDir = new File(System.getProperty("user.dir"), "cache");
+    public TextField pageCount;
+    public TextField downloadQueue;
+    public TextField pageIndex;
 
     private synchronized void start() {
         instance = this;
