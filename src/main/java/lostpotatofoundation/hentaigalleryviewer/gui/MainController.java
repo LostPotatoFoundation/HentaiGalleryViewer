@@ -22,6 +22,9 @@ import java.util.stream.Stream;
 public class MainController {
     public TextField searchBox;
     public ProgressBar progressBar;
+    public TextField pageCount;
+    public TextField downloadQueue;
+    public TextField pageIndex;
 
     public static MainController instance;
 
@@ -35,9 +38,6 @@ public class MainController {
     private static volatile boolean running;
 
     static final File cacheDir = new File(System.getProperty("user.dir"), "cache");
-    public TextField pageCount;
-    public TextField downloadQueue;
-    public TextField pageIndex;
 
     private synchronized void start() {
         instance = this;
@@ -48,6 +48,16 @@ public class MainController {
                 while (downloader != null && !downloader.isDone()) {
                     if (progressBar == null) continue;
                     progressBar.setProgress((downloader.getDownloadProgress() + downloader.getCompressionProgress()) / 2.0D);
+                }
+
+                if (pageCount != null && pageIndex != null && !pageCount.getText().equalsIgnoreCase("" + listOffset)) {
+                    pageCount.setText("" + listOffset);
+                    pageIndex.setText("/" + galleryIndex.size());
+                }
+
+                if (downloadQueue != null && !downloadQueue.getText().equalsIgnoreCase("" + linkStack.size())) {
+                    downloadQueue.clear();
+                    downloadQueue.setText("" + linkStack.size());
                 }
 
                 if (progressBar != null)
