@@ -44,14 +44,22 @@ public class MainController {
         running = true;
 
         Thread main = new Thread(() -> {
-            while (running) {
-                while (downloader != null && !downloader.isDone()) {
-                    if (progressBar == null) continue;
-                    progressBar.setProgress((downloader.getDownloadProgress() + downloader.getCompressionProgress()) / 2.0D);
-                }
+            Thread background = new Thread(() -> {
+                while (running) {
+                    while (downloader != null && !downloader.isDone() && progressBar != null && progressBar.getProgress() != (downloader.getDownloadProgress() + downloader.getCompressionProgress()) / 2.0D)
+                        progressBar.setProgress((downloader.getDownloadProgress() + downloader.getCompressionProgress()) / 2.0D);
 
+                    if (galleryIndex.size() <= (MainGui.panes2d.size() + listOffset + Configuration.buffer))
+                        MainController.instance.doSearch();
+                }
+            });
+
+            background.start();
+            while (running) {
                 if (pageCount != null && pageIndex != null && !pageCount.getText().equalsIgnoreCase("" + listOffset)) {
+                    pageCount.clear();
                     pageCount.setText("" + listOffset);
+                    pageIndex.clear();
                     pageIndex.setText("/" + galleryIndex.size());
                 }
 

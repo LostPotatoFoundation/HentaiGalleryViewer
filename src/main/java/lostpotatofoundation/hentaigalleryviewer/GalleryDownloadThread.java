@@ -105,7 +105,6 @@ public class GalleryDownloadThread extends Thread {
             };
             runCommands(command);
 
-
             imagesCompressed = pages;
         } catch (Exception e) {
             if (Configuration.debug) e.printStackTrace();
@@ -174,7 +173,6 @@ public class GalleryDownloadThread extends Thread {
                 }
             }
             if (downloadImages) {
-                final int[] index = new int[]{0};
                 imageLinks.forEach(im -> {
                     parseSlide(new File(downloadDir, title), im, index[0]);
                     index[0] += 1;
@@ -185,6 +183,7 @@ public class GalleryDownloadThread extends Thread {
         }
     }
 
+    final int[] index = new int[]{0};
     LinkedList<String> imageLinks = new LinkedList<>();
 
     private void parseSlide(File galleryDir, String urlString, int id) {
@@ -258,7 +257,7 @@ public class GalleryDownloadThread extends Thread {
     }
 
     public synchronized double getDownloadProgress() {
-        if (pages != 0) return (double) Math.min(imageID, pages) / (double) pages;
+        if (pages != 0) return (double) index[0] / (double) pages;
         return 0.0D;
     }
 

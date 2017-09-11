@@ -29,7 +29,7 @@ public class GalleryController {
     void update() {
 //        System.out.println("Updated id " + id);
         try {
-            if (galleryIndex.size() > id) {
+            if (galleryIndex.size() > id + listOffset && id > -1) {
                 MainController.galleryData d = galleryIndex.get(listOffset + id);
                 if (!image.equals(d.title)) {
                     galleryTitle.setText(d.title);
@@ -50,14 +50,11 @@ public class GalleryController {
     }
 
     public void mouseScrollEvent(ScrollEvent scrollEvent) {
-        if (scrollEvent.getDeltaY() < 0) //scroll down
+        if (scrollEvent.getDeltaY() < 0 && MainController.galleryIndex.size() > (MainController.listOffset + (MainGui.extraDownloaders_W + 2))) //scroll down
             MainController.listOffset += (MainGui.extraDownloaders_W + 1);
         else if (scrollEvent.getDeltaY() > 0 && MainController.listOffset > 0) //scroll up
             MainController.listOffset -= (MainGui.extraDownloaders_W + 1);
         if (MainController.listOffset < 0) MainController.listOffset = 0;
-
-        if (galleryIndex.size() <= (MainGui.panes2d.size() + listOffset + Configuration.buffer))
-            MainController.instance.doSearch();
 
         MainGui.instance.updateAll();
     }
