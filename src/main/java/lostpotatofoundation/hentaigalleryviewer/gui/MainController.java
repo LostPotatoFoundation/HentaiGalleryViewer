@@ -46,8 +46,8 @@ public class MainController {
         Thread main = new Thread(() -> {
             Thread background = new Thread(() -> {
                 while (running) {
-                    while (downloader != null && !downloader.isDone() && progressBar != null && progressBar.getProgress() != (downloader.getDownloadProgress() + downloader.getCompressionProgress()) / 2.0D)
-                        progressBar.setProgress((downloader.getDownloadProgress() + downloader.getCompressionProgress()) / 2.0D);
+                    if (downloader != null && !downloader.isDone() && progressBar != null && progressBar.getProgress() != (downloader.getDownloadProgress() + downloader.getCompressionProgress()) / 2.0D)
+                        progressBar.setProgress(downloader.getProgress());
 
                     if (galleryIndex.size() <= (MainGui.panes2d.size() + listOffset + Configuration.buffer))
                         MainController.instance.doSearch();
@@ -68,7 +68,7 @@ public class MainController {
                     downloadQueue.setText("" + linkStack.size());
                 }
 
-                if (progressBar != null)
+                if (progressBar != null && progressBar.getProgress() != 0.0D)
                     progressBar.setProgress(0.0D);
 
                 if (!linkStack.empty())

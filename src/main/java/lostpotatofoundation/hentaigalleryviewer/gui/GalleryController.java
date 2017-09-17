@@ -50,13 +50,16 @@ public class GalleryController {
     }
 
     public void mouseScrollEvent(ScrollEvent scrollEvent) {
-        if (scrollEvent.getDeltaY() < 0 && MainController.galleryIndex.size() > (MainController.listOffset + (MainGui.extraDownloaders_W + 2))) //scroll down
+        if (scrollEvent.getDeltaY() < 0 && MainController.galleryIndex.size() > 3 + (MainController.listOffset + ((MainGui.extraDownloaders_W + 1) * (MainGui.extraDownloaders_H + 1)))) {
             MainController.listOffset += (MainGui.extraDownloaders_W + 1);
-        else if (scrollEvent.getDeltaY() > 0 && MainController.listOffset > 0) //scroll up
+            MainGui.instance.updateAll();
+        } else if (scrollEvent.getDeltaY() > 0 && MainController.listOffset > 0) {
             MainController.listOffset -= (MainGui.extraDownloaders_W + 1);
-        if (MainController.listOffset < 0) MainController.listOffset = 0;
+            if (MainController.listOffset < 0)
+                MainController.listOffset = 0;
+            MainGui.instance.updateAll();
+        }
 
-        MainGui.instance.updateAll();
     }
 
     public void downloadGallery() {

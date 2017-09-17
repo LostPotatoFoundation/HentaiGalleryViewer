@@ -59,6 +59,12 @@ public class GalleryDownloadThread extends Thread {
         done = true;
     }
 
+    public double getProgress() {
+        if (commandProcessing != -1)
+            return (getCommandsProgress() + getDownloadProgress() + getCompressionProgress()) / 3.0D;
+        else return (getDownloadProgress() + getCompressionProgress()) / 2.0D;
+    }
+
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public void deleteLoseArchive() {
         File looseFileDirectory = new File(downloadDir, title);
@@ -266,6 +272,10 @@ public class GalleryDownloadThread extends Thread {
         return 0.0D;
     }
 
+    public synchronized double getCommandsProgress() {
+        if (pages != 0) return (double) commandProcessing / (double) pages;
+        return 0.0D;
+    }
     public synchronized String getTitle() {
         return title;
     }
@@ -284,10 +294,12 @@ public class GalleryDownloadThread extends Thread {
         return imageFile;
     }
 
+    private int commandProcessing = -1;
     public void processAndSaveGallery() {
         if (Configuration.preCompressCommands.size() > 0) {
             File looseFileDirectory = new File(downloadDir, title);
             for (String command : Configuration.preCompressCommands) {
+                commandProcessing = 0;
                 File[] innerFiles = looseFileDirectory.listFiles();
                 assert innerFiles != null;
 
@@ -305,6 +317,7 @@ public class GalleryDownloadThread extends Thread {
                     System.out.println(Arrays.toString(innerFiles));
 
                 for (File innerFile : innerFiles) {
+                    commandProcessing++;
                     String[] clone = c.clone();
                     clone[index] = "\"" + innerFile.getPath() + "\"";
                     if (Configuration.debug)
