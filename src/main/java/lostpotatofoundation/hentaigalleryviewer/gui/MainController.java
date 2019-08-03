@@ -128,11 +128,15 @@ public class MainController {
             inputStream.close();
             connection.disconnect();
 
+            lineList.forEach(System.out::println);
+
             LinkedList<String> link = new LinkedList<>(), title = new LinkedList<>(), previewImage = new LinkedList<>();
+            boolean firstTime = true;
             for (String line : lineList) {
                 Matcher galleryLinkMatcher = Pattern.compile("https?://exhentai\\.org/g/[^\"]+").matcher(line),
-                        galleryTitleMatcher = Pattern.compile("(?=https?://exhentai\\.org/g/[^\"]+)[^<]+").matcher(line),
-                        galleryPreviewMatcher = Pattern.compile("https?://exhentai\\.org/t/[^\"]+").matcher(line);
+                        galleryTitleMatcher = Pattern.compile("(?:alt=\")[^\"]{2,}").matcher(line),
+                        galleryPreviewMatcher = Pattern.compile("https?://exhentai\\.org/t/[a-zA-Z0-9_\\-/.]+").matcher(line),
+                        galleryPreviewMatcher2 = Pattern.compile("inits~exhentai\\.org~t/[a-zA-Z0-9_\\-/.]+").matcher(line);
 
                 while (galleryLinkMatcher.find()) {
                     String g = galleryLinkMatcher.group();
@@ -142,8 +146,8 @@ public class MainController {
 
                 while (galleryTitleMatcher.find()) {
                     String g = galleryTitleMatcher.group();
-                    if (g.split(">").length > 1)
-                        title.add(g.split(">")[1]);
+                    if (g.split("\"").length > 1)
+                        title.add(g.split("\"")[1]);
                 }
 
                 while (galleryPreviewMatcher.find()) {
@@ -151,9 +155,22 @@ public class MainController {
                     previewImage.add(g);
                     downloadImage(g);
                 }
+
+                while (galleryPreviewMatcher2.find()) {
+                    String g = galleryPreviewMatcher2.group();
+                    g = g.replace("inits~exhentai.org~", "http://exhentai.org/");
+                    previewImage.add(g);
+                    downloadImage(g);
+                }
             }
             for (int i = 0; i < link.size(); i++) {
-                galleryIndex.add(new galleryData(link.get(i), previewImage.get(i), title.get(i)));
+                System.out.println(title.size() + "  Titles found");
+                System.out.println(previewImage.size() + "  Pictures found");
+                System.out.println(link.size() + "  Galleries found");
+                if (link.size() == previewImage.size() && previewImage.size() == title.size())
+                    galleryIndex.add(new galleryData(link.get(i), previewImage.get(i), title.get(i)));
+                else
+                    System.out.println("Sizes do not match up!!");
             }
             if (galSize == galleryIndex.size()) fail = true;
         } catch (Exception e) {

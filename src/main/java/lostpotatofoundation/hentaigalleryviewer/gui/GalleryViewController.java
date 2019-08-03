@@ -52,7 +52,7 @@ public class GalleryViewController {
                         try {
                             if (images.size() > offset)
                                 imagePort.setImage(SwingFXUtils.toFXImage(ImageIO.read(images.get(offset)), null));
-                            progress.setProgress((double) offset + 1D / (double) links.size());
+                            progress.setProgress((double) offset / (double) links.size());
                         } catch (Exception e) {
                             System.out.println(e.getMessage());
                             if (Configuration.debug)
